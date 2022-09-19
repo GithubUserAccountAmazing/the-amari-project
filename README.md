@@ -12,7 +12,7 @@
 
 <br><br>
 
-## Intro:<br>where I try to convince the reader that generating thousands of faces isn't weird
+## Intro:<br>where I try to convince the reader that<br> generating thousands of faces isn't weird
 
 
 After learning about [textual inversion](https://github.com/rinongal/textual_inversion) 2 of my first thoughts were:
