@@ -10,12 +10,23 @@
 
 ----
 
-<br><br>
+<br>
 
-## Intro:<br>where I try to convince the reader that<br> generating thousands of faces isn't weird
+## **Table of Contents**
 
+1. [Introduction (where I try to convince the reader that generating thousands of faces isn't weird)](#introduction)
+2. [Using Stable-Diffusion to Mine for a Specific Face](#using-stable-diffusion-to-mine-for-a-specific-face)
+3. [Putting an AI generated Face to a Name](#putting-an-ai-generated-face-to-a-name)
+4. [Textual Inversion Testing and Training](#textual-inversion-testing-and-training)
+5. [Prompting Stable Diffusion for *](#prompting-stable-diffusion-for-)
+6. [Analyzing the Results](#analyzing-the-results)
+7. [Final Thoughts about the Amari Project](#final-thoughts-about-the-amari-project)
 
-After learning about [textual inversion](https://github.com/rinongal/textual_inversion) 2 of my first thoughts were:
+<br>
+
+## Introduction
+
+<br>After learning about [textual inversion](https://github.com/rinongal/textual_inversion) 2 of my first thoughts were:
 
 - could this be used to teach Stable-Diffusion (SD) a specific person/face?
 - and if I wanted to test this idea, how could I go about it? 
