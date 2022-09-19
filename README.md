@@ -125,7 +125,7 @@ The training group and sim-score are both shown beneath each image.<br>
 |:---:|:---:|:---:|:---:|
 |<b><p align="center">a-312 : 0.4452</p>|<b><p align="center">b-11 : 0.4802</p>|<b><p align="center">c-4 : 0.4735</p>|<b><p align="center">ctrl : 0.7520</p>|
 
-*This is the only image out of 80 that had a sim-score <=0.40. However, the realism of this image is arguably not great.
+*This is the only image out of 80 that had a sim-score <=0.40. However, the realism of this image is arguably not great. The image also does not reflect the prompt idea of 'walking outside.'
  
 <br>For the full set of 80 images see the included amari_test_images.zip<br><br>
 
