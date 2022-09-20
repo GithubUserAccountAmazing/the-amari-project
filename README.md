@@ -87,9 +87,25 @@ While not particularly important-I felt the face being generated needed a name. 
 
 I wanted to see what differences would arise in the images produced in all 3 groups for the same amount of training using the same prompt and seed values. I also wanted to view the data that is created during training to get an understanding of how the number of images in the group effects the actual training.
 
+ 
 I trained each group until approximately 15,500 steps. This was the total amount of steps it took for group a_312 to reach a single completed epoch.
 
-[more information about the training data will be available here soon] :)
+ <br><br>
+ 
+The default textual-inversion settings were used for training with the specific command being.
+ 
+ 
+
+     python3 ./main.py --base ./configs/stable-diffusion/v1-finetune.yaml \
+                  -t \                                             
+                  --actual_resume ./models/ldm/stable-diffusion-v1/model.ckpt \                                             
+                  -n amari \                                       
+                  --gpus 0,1 \                                            
+                  --data_root /home/user/ai/trainingimages/ \                                           
+                  --init_word 'woman'
+
+ 
+ [more information about the training data will be available here soon] :)
   
 <br><br>
 ## Prompting Stable-Diffusion for *
