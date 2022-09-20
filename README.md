@@ -75,6 +75,8 @@ The Face Recognition program works by comparing 2 images and outputting a number
 
 While not particularly important-I felt the face being generated needed a name. The name Amari was chosen since it had several meanings such as eternal and immortal. Thus, the name of the project, the bash script, and the face had been born.<br><br>
 
+Finally, [`imageTransformer.py`](imageTransformer.py) was written to copy, rescale, and rename the images produced during the face mining step.
+
 ## Textual Inversion Testing and Training
 
 <br>The textual inversion paper recommends 3-5 images being used to train with, however, the paper only focuses using textual inversion on objects and art styles and never once dives into the concept of creating artificial humans. I wanted to test textual inversion using the recommended number of images as well as larger groups of images—I ended up creating 3 different training groups.
@@ -193,17 +195,16 @@ Number of images in a training group will determine the sim-scores for a generat
  
  <br>
  
-It was noticed that in the c_4 prompt testing images, Amari seemed to display very pronounced clavicles. After looking at the 4 images within the c_4 training group, 3/4 of the images were found to have visible clavicles. Stable-Diffusion seems to have taken the concept of clavicles and amplified it to caricature-esque levels. Hinting that if a trained human model wanted to be created, a large number of images with varying clothes, facial expressions, lighting, environments, etc. would need to be provided to counteract any possibility of the model latching onto any specific characteristic. That being said, the ideal number of images that would be needed is unknown.
  
 It is unknown currently how an increase in training time would influence the results for the 3 training groups. I may in the future add more time to each group and post the results.
- 
+
 It's also currently unknown what the sim-scores of an actual collection of a real human face is-perhaps 0.40 is still too high. Also, it's very easy to consider that the idea of a 'sim-score' may not be the best way of determining if any single face should belong in a group of faces.
 
-It was noticed that while using ASDF to generate faces—many of the images seemed to have been upscaled incorrectly when it came to certain hairstyles. This may be the result of Real-ESRGAN and/or GFPGAN displaying training bias. More research would need to be done to determine if that is indeed factual. Simple observation showed that straight hair was upscaled more appropriately than tightly coiled hairstyles.
+It was noticed that while using ASDF to generate faces—many of the images seemed to have been upscaled incorrectly when it came to certain hairstyles. This may be the result of Real-ESRGAN and/or GFPGAN displaying training bias. More research would need to be done to determine if that is indeed factual. Simple observation showed that straight hair was upscaled more appropriately than tightly coiled hairstyles. This resulted in the trained models having a high likelyhood of generated malformed hairstyles.
 
-This project did not dig into using modifier prompts to produce faces. It is probable that higher quality faces could be produced with modified prompts. I also did not look into using img2img to produce faces either. It is likely that img2img could be a powerful tool as well.
+Outside of the prompts listed during the testing phase, this project did not look into using other prompts to produce faces. These images were also not upscaled after being generated. It is probable that higher quality faces could be produced with modified prompts and upscaling. I also did not look into using img2img to produce faces either. It is lprobable that img2img could be a powerful tool as well.
 
- [more thoughts, data, charts, and files will be provided over the next several days]
+[more thoughts, data, charts, and files will be provided over the next several days]
 
 
 
