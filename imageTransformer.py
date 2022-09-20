@@ -1,16 +1,29 @@
 #!/usr/bin/env python
-# imageTransformer.py
-# https://github.com/originates/the-amari-project/
+#
+#
+#                      imageTransformer.py
+#        https://github.com/originates/the-amari-project/
 # 
-# Preprocess all images in a directory to be used for textual inversion.
 #
-# copies images in a directory
-# crops images to 512x512 and saves them to outImages directory
-# 
-# usage:
+# ---------------------------------------------------------------------------
 #
-# python imagecrop.py '/path/to/input/images/' '/path/to/output/images/'
+#  Preprocess all images in a directory to be used for textual inversion.
 #
+#  copies images in a directory
+#  crops images to 512x512 and saves them to outImages directory
+#
+# ---------------------------------------------------------------------------
+#
+#  usage:
+#
+#  python imagecrop.py '/path/to/input/images/' '/path/to/output/images/'
+#
+# ---------------------------------------------------------------------------
+#
+#  this script runs a bash command to rename the files to random characters.
+#
+# ---------------------------------------------------------------------------
+
 
 import torch
 import torchvision.transforms as T
