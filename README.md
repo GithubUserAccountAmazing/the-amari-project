@@ -204,7 +204,7 @@ It's also currently unknown what the sim-scores of an actual collection of a rea
 
 It was noticed that while using ASDF to generate faces—many of the images seemed to have been upscaled incorrectly when it came to certain hairstyles. This may be the result of Real-ESRGAN and/or GFPGAN displaying training bias. More research would need to be done to determine if that is indeed factual. Simple observation showed that straight hair was upscaled more appropriately than tightly coiled hairstyles. This resulted in the trained models having a high likelyhood of generated malformed hairstyles.
 
-Outside of the prompts listed during the testing phase, this project did not look into using other prompts to produce faces. These images were also not upscaled after being generated. It is probable that higher quality faces could be produced with modified prompts and upscaling. I also did not look into using img2img to produce faces either. It is lprobable that img2img could be a powerful tool as well.
+Outside of the prompts listed during the testing phase, this project did not look into using other prompts to produce faces. These images were also not upscaled after being generated. It is probable that higher quality faces could be produced with modified prompts and upscaling. I also did not look into using img2img to produce faces either. It is probable that img2img could be a powerful tool as well.
 
 [more thoughts, data, charts, and files will be provided over the next several days]
 
