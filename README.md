@@ -81,9 +81,11 @@ While not particularly important-I felt the face being generated needed a name. 
 
  <img align="right" src="https://github.com/originates/the-amari-project/blob/main/github%20images/total_epochs_at_global_step_50n.png?raw=true" width="45%">
  
-- &nbsp;&nbsp;&nbsp;a_312&nbsp;&nbsp; -&nbsp;&nbsp;312 images (all)
-- &nbsp;&nbsp;&nbsp;b_11&nbsp;&nbsp;&nbsp;&nbsp; -&nbsp;&nbsp;&nbsp;11 images    
-- &nbsp;&nbsp;&nbsp;c_4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -&nbsp;&nbsp;&nbsp;&nbsp;4 images       
+ | training group | Total Images |
+ |:---:|:---:|
+ |&nbsp;&nbsp;a_312&nbsp;&nbsp;| &nbsp;&nbsp;312 (all) images &nbsp;&nbsp;|
+ |&nbsp;&nbsp;b_11&nbsp;&nbsp;| &nbsp;&nbsp;11 images&nbsp;&nbsp; |
+ |&nbsp;&nbsp;c_4&nbsp;&nbsp;| &nbsp;&nbsp;4 images&nbsp;&nbsp; |   
 
 I wanted to see what differences would arise in the images produced in all 3 groups for the same amount of training using the same prompt and seed values. I also wanted to view the data that is created during training to get an understanding of how the number of images in the group effects the actual training.
 
