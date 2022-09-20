@@ -194,7 +194,8 @@ Number of images in a training group will determine the sim-scores for a generat
 - A trained face model that uses more than the reccommended amount of 3-5 images will produce faces more similar to the original faces on average.
  
  <br>
- 
+
+The default imagenet_templates were used during training and I am currently uncertain how modifying these prompts would alter the trained model.
  
 It is unknown currently how an increase in training time would influence the results for the 3 training groups. I may in the future add more time to each group and post the results.
 
