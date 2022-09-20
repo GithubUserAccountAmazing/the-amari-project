@@ -203,7 +203,7 @@ It was noticed that while using ASDF to generate faces—many of the images seem
 
 This project did not dig into using modifier prompts to produce faces. It is probable that higher quality faces could be produced with modified prompts. I also did not look into using img2img to produce faces either. It is likely that img2img could be a powerful tool as well.
 
- [more thoughts, data, charts, and files will be provided in the next several days]
+ [more thoughts, data, charts, and files will be provided over the next several days]
 
 
 
