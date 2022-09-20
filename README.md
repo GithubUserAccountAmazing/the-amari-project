@@ -73,9 +73,9 @@ The Face Recognition program works by comparing 2 images and outputting a number
 
 <br>After mining for faces for many hours—312 images with a <=0.40 sim-score to each other had been created. There was also approximately 3900 images that were 'almost' considered the same person
 
-While not particularly important-I felt the face being generated needed a name. The name Amari was chosen since it had several meanings such as eternal and immortal. Thus, the name of the project, the bash script, and the face had been born.<br><br>
+While not particularly important-I felt the face being generated needed a name. The name Amari was chosen since it had several meanings such as eternal and immortal. Thus, the name of the project, the bash script, and the face had been born.
 
-Finally, [`imageTransformer.py`](imageTransformer.py) was written to copy, rescale, and rename the images produced during the face mining step.
+Finally, [`imageTransformer.py`](imageTransformer.py) was written to copy, rescale, and rename the images produced during the face mining step.<br><br>
 
 ## Textual Inversion Testing and Training
 
