@@ -1,6 +1,6 @@
 note: this repository will most likely be renamed to Stable-Diffusion-Tests-and-Data (or something similar) with The Amari Project becoming a sub directory of the newly named repository. There are several more Stable-Diffusion related tests that I think would be interesting to perform and learn from. Once new tests and data are created they will be merged into this repository.
 
-If you have any thoughts, relevant knowledge, or ideas that you would like to pass on to me, feel free to email me at originates@filomatheia.xyz
+If you have any thoughts, relevant knowledge, or ideas that you would like to pass on to me, feel free to email me at originates@tutanota.com
 
 
 ---
