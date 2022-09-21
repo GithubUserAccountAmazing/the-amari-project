@@ -18,7 +18,7 @@ If you have any thoughts, relevant knowledge, or ideas that you would like to pa
 
 ## **Table of Contents**
 
-1. [Introduction (where I try to convince the reader that generating thousands of faces isn't weird)](#introduction)
+1. [Introduction (where I try to subtly convince the reader that generating thousands of faces isn't weird)](#introduction)
 2. [Using Stable-Diffusion to Mine for a Specific Face](#using-stable-diffusion-to-mine-for-a-specific-face)
 3. [Putting an AI generated Face to a Name](#putting-an-ai-generated-face-to-a-name)
 4. [Textual Inversion Testing and Training](#textual-inversion-testing-and-training)
@@ -30,9 +30,9 @@ If you have any thoughts, relevant knowledge, or ideas that you would like to pa
 
 ## Introduction
 
-<br>After learning about [textual inversion](https://github.com/rinongal/textual_inversion) 2 of my first thoughts were:
+<br>After learning about [Textual Inversion](https://github.com/rinongal/textual_inversion) 2 of my first thoughts were:
 
-- could this be used to teach Stable-Diffusion (SD) a specific person/face?
+- could this be used to teach [Stable-Diffusion](https://github.com/CompVis/stable-diffusion) (SD) a specific person/face?
 - and if I wanted to test this idea, how could I go about it? 
 
 
@@ -60,17 +60,18 @@ What if I used SD itself to generate faces? <br><br>
 
 Generating faces in SD can be incredibly hit or miss in terms of the quality of the image produced. 
 
-To mitigate image quality issues-a bash script later titled the AMARI SD FaceMiner (ASDF) was created. 
+To mitigate image quality issues-a bash script later titled the [`AMARI SD FaceMiner (ASDF)`](https://github.com/originates/the-amari-project/blob/main/AMARI%20SD%20FaceMiner) was created. 
 
 ASDF is composed of 5 general steps
 
-1. Generate face images from a prompt using SD.
+1. Generate face images from a prompt using SD using the model `sd-v1-4.ckpt`
 2. AI upscale the images and facial features using [Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN) and [GFPGAN](https://github.com/TencentARC/GFPGAN).
 3. Compare the upscaled images to a set of images, labeled 'sim-group' using [Face Recognition](https://github.com/ageitgey/face_recognition)
 4. Sort the images based on how similar they are to the sim-group. If the image is considered very similar the image will itself be included into the sim-group.
 5. Use Face Recognition to determine the average similarity of all the images within the sim-group and remove images if they become less similar to the group as new images are included.
 
-The Face Recognition program works by comparing 2 images and outputting a number between 0 to 1 with 0 being perfectly similar and 1 being not at all similar. The default tolerance level for deciding if 2 faces are the same is <=0.60. Judging from visual inspection, 0.60 was not strict enough and 0.40 seemed to be a more reasonable acceptable tolerance level. This number would be referred to as the image's Sim-Score, short for similarity score.<br><br>  
+The Face Recognition program works by comparing 2 images and outputting a number between 0 to 1 with 0 being perfectly similar and 1 being not at all similar. The default tolerance level for deciding if 2 faces are the same is <=0.60. Judging from visual inspection, 0.60 was not strict enough and 0.40 seemed to be a more reasonable acceptable tolerance level. This number would be referred to as the image's Sim-Score, short for similarity score.<br><br> 
+
 
 
 ## Putting an AI Generated Face to a Name.
@@ -100,8 +101,11 @@ I trained each group until approximately 15,500 steps. This was the total amount
 
  <br><br>
  
-The default textual-inversion settings were used for training with the specific command being.
- 
+The default textual-inversion settings were used for training using `sd-v1-4.ckpt`
+
+The associated config yaml files used can be found [here](https://github.com/originates/the-amari-project/tree/main/configs/the%20amari%20project/textual%20inversion)
+
+The specific command used:
  
 
      python3 ./main.py --base ./configs/stable-diffusion/v1-finetune.yaml \
