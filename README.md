@@ -48,10 +48,11 @@ I considered using someone else’s face but again, decided against this idea as
 - I did not want to use someone's face without permission
 - I generally wanted to avoid explaining to someone why I wanted to use their face for a machine learning project.
 
-
 If the potential to use my face or someone else’s face was out of the question, how could I possibly have a face to use as training data for SD? 
 
-What if I used SD itself to generate faces? <br><br>
+What if I used SD itself to generate faces? 
+
+(it wasn't until half way through the project that it was realized that royalty-free stock images could have accomplished this instead)<br><br>
 
 
 ## Using Stable-Diffusion to Mine for a Specific Face
