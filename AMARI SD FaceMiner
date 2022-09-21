@@ -1,0 +1,343 @@
+#!/bin/bash
+#
+#   AMARI SD faceMiner - an implementation of using Stable-Diffusion
+# 			 to generate images to be used as training data
+#			 for unique and/or specific machine learning models.
+#
+#                        https://github.com/originates/the-amari-project
+#
+#   Using your custom prompt to generate faces-this script is designed to find
+#   the most similar faces from the generated images and sort them into a specific
+#   'sim-group' folder. All images that 'almost' look like your person 
+#   you are generating are placed into a separate 'almost-sim' folder. 
+#   All other images are placed into an 'unknown-person' folder.
+#
+#   The AMARI SD faceMiner is designed to be less strict on what faces it includes into the sim-group early on.
+#   while generating a small number of faces. As new images are included it will become more strict while also
+#   generating more faces per batch. Faces will be moved out of the [sim-group] into the [almost-sim] group if they
+#   do not meet the current upper bounds of face similarity at that time.
+#
+#   If no images are added to the sim-group after 2 image generation batches in a row the script will
+#   automatically become 5% less strict on who will be included in the group going forward. It will
+#   do this again 2 rounds (in a row) later. If no images are added after this-all images
+#   within the [almost-sim] group will be moved into the [sim-group] and will be retested against itself.
+#   The tolerance of the upper bounds will be relaxed and all images above this new tolerance will be
+#   moved back into the almost-sim group. Any change to a prompt will likely result in this happening. It is also
+#   likely to happen towards the initial portion of running the script.
+#   After this initial test, another test with a lower upper bounds will be conducted to remove any
+#   remaining outlier faces out of this group. Images may be added to the group but still result in this
+#   happening if 2 sets of 2 consecutive unproductive rounds happen before a sim-test is triggered by $simtestttl.
+#
+#   The current command that is generally being used to calculate the upper bounds on what is considered a similar face:
+#
+#   echo "scale=6; (e((-1/$GROUPAVG)*l(3/4))*(0.99^$GROUPTOTAL)+0.25)*$sqdifmean+$GROUPAVG+0.005" | bc -l)
+#       
+#       $GROUPAVG = the average similarity of the individuals in group against itself
+#
+#       $GROUPTOTAL = the total images in the similarity group folder.
+#
+#       $sqdifmean = should roughly equal +1SD of the group.
+#
+#   This should translate to:
+#
+#       large $GROUPTOTAL = lower upper bounds (strict)
+#       small $GROUPTOTAL = higher upper bounds (less strict)
+#
+#       large $GROUPAVG = strict
+#       small $GROUPAVG = less strict
+#
+#   as the amount of faces becomes larger while also having a low group average, more images will
+#   be generated per batch to compensate for the lowered probability of finding matches. The upper bounds
+#   will also trend towards slightly above the group average, allowing for a sudden narrow focus
+#   on the collection of faces it has generated.
+#
+#
+#   Images can freely be removed from either folder at any time if results at that time are not ideal.
+#
+#   docker is used for face_recognition. After completing this script I had decided to simply use a conda
+#   environment instead. The docker command remains.
+#
+#   If, for some reason, your dream is to become a professional face miner: much of this script
+#   can and should be further optimized.
+#
+
+
+clear
+echo "         _      __  __      _      ____    ___        ____    ____     "
+echo "        / \    |  \/  |    / \    |  _ \  |_ _|      / ___|  |  _ \    "
+echo "       / _ \   | |\/| |   / _ \   | |_) |  | |       \___ \  | | | |   "
+echo "      / ___ \  | |  | |  / ___ \  |  _ <   | |        ___) | | |_| |   "
+echo "     /_/   \_\ |_|  |_| /_/   \_\ |_|_\_\ |___|      |____/  |____/    "
+echo "                                                                       "
+echo "      __                            __  __   _                         "
+echo "     / _|   __ _    ___    ___     |  \/  | (_)  _ __     ___   _ __   "
+echo "    | |_   / _' |  / __|  / _ \    | |\/| | | | | '_ \   / _ \ | '__|  " 
+echo "    |  _| | (_| | | (__  |  __/    | |  | | | | | | | | |  __/ | |     "
+echo "    |_|    \__,_|  \___|  \___|    |_|  |_| |_| |_| |_|  \___| |_|     "
+echo "                                                                       "
+echo "                                                                       "
+echo "         AMARI_SD_faceMiner   -   10-sep-2022   -   originates         "
+echo "                                                                       "
+
+AI=$(echo "/home/$USER/ai") # the 'main' folder where everything is stored
+MYFILES=$(echo "$AI/face_recognition/myfiles") #where you will be storing all of your completed images and text files files / directory
+DATAFILES=$(echo "$MYFILES/data") #where text files are stored while the script is running.
+PNGf=$(echo "$AI/stable-diffusion/outputs/GFPGAN/fresh/") #stable-diffusion output directory. (this will add the samples folder automatically)
+
+SIM=$(echo "theAMARI") #the name of the folder that will hold your sim files.
+ALMOST=$(echo "ALMOST$SIM") #this is the name of the folder where nearly similar images to your group are stored
+
+if [ ! -d $AI ]; then mkdir -p $AI; fi; if [ ! -d $MYFILES ]; then mkdir -p $MYFILES; fi;
+if [ ! -d $MYFILES/$SIM ]; then mkdir -p $MYFILES/$SIM; fi; if [ ! -d $MYFILES/$ALMOST ]; then mkdir -p $MYFILES/$ALMOST; fi;
+if [ ! -d "$MYFILES/unknownPerson" ]; then mkdir -p "$MYFILES/unknownPerson"; fi; 
+if [ ! -d $PNGf ]; then mkdir -p $PNGf; fi;
+
+if [ ! -f $DATAFILES/thegroupavg ]; then echo "0.5" > $DATAFILES/${SIM}GroupScore; fi; THETOTgAVG=$(cat $DATAFILES/${SIM}GroupScore)
+if [ ! -f $DATAFILES/thehighlimit ]; then echo "0.5" > $DATAFILES/thehighlimit; fi; HIGHLIMIT=$(cat $DATAFILES/thehighlimit)
+if [ ! -f $DATAFILES/SIMSCORES ]; then > $DATAFILES/SIMSCORES; fi; SIMSCOREFILE=$(echo "$DATAFILES/SIMSCORES")
+if [ ! -f $DATAFILES/ttlcnt ]; then echo "0" > $DATAFILES/ttlcnt; fi; ttlcnt=$(cat $DATAFILES/ttlcnt)
+if [ ! -f $DATAFILES/${SIM}GroupScore ]; then echo "0.5" > $DATAFILES/${SIM}GroupScore; fi; GROUPAVG=$(cat $DATAFILES/${SIM}GroupScore)
+if [ ! -f $DATAFILES/$ALMOST ]; then > "$DATAFILES/$ALMOST"; fi
+
+#used to determine what directory to be using when using the docker command.
+DCKR=$(echo "/usr/local/lib/python3.10/site-packages/face_recognition-1.4.0-py3.10.egg/face_recognition/myfiles")
+
+#get the initial total number of files in the simgroup and almostsim folders
+GROUPTOTAL=$(echo $(ls $MYFILES/$SIM -Uba1 | grep -c .png)); ALMOSTTOTAL=$(echo $(ls $MYFILES/$ALMOST -Uba1 | grep -c .png));
+
+#----------------------------------------------------------------
+#set initial variables. SEED is set at 999.... for Stable-Diffusion to automatically select a random seed (999... is over max value)
+SEED=999999999999999; LOOPCNT=0; countrounds=0; SIMFIX=0; SKIP2ANALYSIS=0; mvmlt=1; strictLIM=0;
+SDTTL=$(echo "4"); X=$(echo "1"); simtestttl=$(echo "3"); hLIMIT=0; DONE=0; zeropoint8=0; skipthis=0;
+
+#determines the # of images added before running sim-test (set at 10% of current total)
+echo "time, simgroup, almostsim, avg, highlim, loop cnt, remaining imgb4test, required imgb4test" >> $DATAFILES/AMARIarchive
+
+#basic error handling for some files.
+if [[ $HIGHLIMIT == -* ]]; then echo -e "\n  Upper bounds error! reverting to 0.5"; HIGHLIMIT=$(echo "0.5");
+elif [[ $HIGHLIMIT  == "0.000000" ]]; then echo -e "\n  Upper bounds error! reverting to 0.5"; HIGHLIMIT=$(echo "0.5"); fi;
+if [[ $GROUPAVG == "0.000000" ]]; then echo -e "\n  group sim score error! reverting to 0.5"; GROUPAVG=$(echo "0.5"); fi
+
+#runs until 500 similar faces of 0.4 tolerance have been created unless manually stopped
+while [ $DONE -lt 2 ]; do DONE=$(echo "0")
+
+if [[ $GROUPTOTAL -gt 99 ]]; then SKIP2ANALYSIS=$(echo "2"); fi; 
+LOOPCNT=$((LOOPCNT+1)); roundCNT=$(echo "2-$countrounds" | bc);
+
+if [[ $SKIP2ANALYSIS -eq 0 ]]; then
+echo -e "\n   ------------------------------------------------------------------\n"
+        echo -e "                     total similar faces : $GROUPTOTAL\n"
+if [ $GROUPAVG != "0" ]; then
+	echo -e "           approx group similarity score : $GROUPAVG"
+	echo -e "                    current upper bounds : $HIGHLIMIT\n"
+else
+	echo -e "                initialized upper bounds : $HIGHLIMIT\n"
+fi
+        echo -e "                             image batch : ${LOOPCNT}"
+if [ $roundCNT != "1" ]; then
+	echo -e "                             sim-test at : $simtestttl+ newly added images"
+	echo -e "         or upper bounds readjustment/simfix at : $roundCNT batches"
+else
+	echo -e "            upper bounds will be readjusted/simfix if an image is not added!"
+fi;     echo -e "\n                 this batch will produce : $SDTTL images" 
+echo -e "\n   ------------------------------------------------------------------\n"
+
+echo "$(date +%T), $GROUPTOTAL, $ALMOSTTOTAL, $GROUPAVG, $HIGHLIMIT, $LOOPCNT, $simtestttl, $SDTTL, INTRO" >> $DATAFILES/AMARIarchive
+
+#activate stable-diffusion environment and prompt for images
+source /home/$USER/anaconda3/bin/activate && conda activate ldm; wait; cd "$AI/stable-diffusion/"; thePROMPT=$(cat "$MYFILES/prompt/thePrompt")
+
+echo -e "  $(date +%T) - generating images from prompt:\n"; echo -e "   ${thePROMPT}\n" | sed 's/\./\.\n  /g'
+
+python "$AI/stable-diffusion/scripts/txt2img.py" --prompt "$thePROMPT" --ddim_steps 250 --n_iter $X --n_samples 4 \
+	--scale 8.2653 --skip_grid --outdir "$AI/stable-diffusion/outputs/GFPGAN/fresh/" --seed $SEED &> /dev/null; wait
+
+if [ $skipthis -eq 0 ]; then #set $skipthis to 1 if you only want the face upscaled.
+
+	#exit ldm and activate ESRGAN upscaling environment.
+	conda deactivate; cd $AI/Real-ESRGAN/; conda activate UPSCAL; echo -e "  $(date +%T) - upscaling images";
+
+	python "$AI/Real-ESRGAN/inference_realesrgan.py" -n RealESRGAN_x4plus -i "$PNGf/samples/" \
+		--outscale 2 --face_enhance &>/dev/null; wait;
+
+	#remove original stable-diffusion images 
+	for file in "$PNGf/samples/"*.png; do rm $file; done;
+
+	#exit ESRGAN env and enter FACEUP env to upscale face.
+	conda deactivate; cd $AI/GFPGAN/; conda activate FACEUP; echo -e "  $(date +%T) - focusing on upscaling facial features";
+
+	python "$AI/GFPGAN/inference_gfpgan.py" -i "$AI/Real-ESRGAN/results/" --bg_upsampler realesrgan -o "$MYFILES/preRec/" &>/dev/null; wait;
+
+	#remove the files prior to previous step
+	for file in "$AI/Real-ESRGAN/results/*.png"; do rm $file; done;
+
+else
+	#skipping full image upscale. Only focusing on face.
+	conda deactivate; cd $AI/GFPGAN/; conda activate FACEUP; echo -e "  $(date +%T) - focusing on upscaling facial features";
+
+	python "$AI/GFPGAN/inference_gfpgan.py" -i "$PNGf/samples/" --bg_upsampler realesrgan -o "$MYFILES/preRec/" &>/dev/null; wait;
+
+	for file in "$PNGf/samples/"*.png; do rm $file; done;
+fi	
+
+imgnum=1; TIMESTAMP=$(date +%s); for file in "$MYFILES/preRec/restored_imgs/"*.png; do mv -- "$file" \
+	"$(mktemp --dry-run "$MYFILES/preRec/restored_imgs/${TIMESTAMP}_${imgnum}_XXXX.png")"; imgnum=$(echo "$imgnum+1" | bc); done;
+
+conda deactivate; wait; echo -e "  $(date +%T) - starting individual-group facial analysis \n"; cd "$MYFILES";
+
+#check each new file agains the sim-group 
+docker run -it --rm -v $MYFILES:$DCKR facerec face_recognition --tolerance 1 --show-distance true $DCKR/$SIM/ $DCKR/preRec/restored_imgs > "$DATAFILES/prePA1"; wait;
+
+cat "$DATAFILES/prePA1" | grep -v ',None' | grep -Po '(?<=restored_imgs/).+' > "$DATAFILES/prePA2"
+
+awk -v maxvalue="$HIGHLIMIT" -F',' \
+	'{ sum[$1]+=$3;  cnt[$1]++ } ; END { for (i in sum) if (sum[i]/cnt[i] <= maxvalue) print i }' \
+	"$DATAFILES/prePA2" > "$DATAFILES/SIM_A"
+
+awk -v maxvalue="$HIGHLIMIT" -F',' \
+	'{ sum[$1]+=$3;  cnt[$1]++ } ; END { for (i in sum) if (sum[i]/cnt[i] > maxvalue && sum[i]/cnt[i] < maxvalue+0.10) print i }' \
+	"$DATAFILES/prePA2" > "$DATAFILES/$ALMOST"
+
+awk -F',' '{ sum[$1]+=$3;  cnt[$1]++ } ; END { for (i in sum) print "  " i " : " sum[i]/cnt[i] }' "$DATAFILES/prePA2"
+
+TOTAL=$(wc -l "$DATAFILES/SIM_A" | cut -d' ' -f1); almostTOTAL=$(wc -l "$DATAFILES/$ALMOST" | cut -d' ' -f1);
+
+if [ $TOTAL -gt 0 ]; then for file in $(cat "$DATAFILES/SIM_A"); do mv "$MYFILES/preRec/restored_imgs/$file" "$MYFILES/$SIM"; done; wait; fi;
+
+if [ $almostTOTAL -gt 0 ]; then for file in $(cat "$DATAFILES/$ALMOST"); do mv "$MYFILES/preRec/restored_imgs/$file" "$MYFILES/$ALMOST"; done; wait; fi;
+
+totREMAIN=$(ls $MYFILES/preRec/restored_imgs/ -Uba1 | grep -c .png)
+
+if [ $totREMAIN -gt 0 ]; then for file in "$MYFILES/preRec/restored_imgs/"*.png; do mv "$file" "$MYFILES/unknownPerson"; done; wait; fi;
+
+echo -e "\n  $TOTAL possible matches found\n  $almostTOTAL nearly match\n  $totREMAIN unknown"
+
+ttlcnt=$(echo $ttlcnt+$TOTAL | bc) ; echo $ttlcnt > $DATAFILES/ttlcnt; echo $ttlcnt >> $DATAFILES/ttlcntarchive;
+simtestttl=$(echo "$simtestttl - $TOTAL" | bc)
+
+else echo "  tolerance readjustment activated. A new sim-group will be created!"; fi; 
+	
+GROUPTOTAL=$(ls "$MYFILES/$SIM" -Uba1 | grep -c .png) ; if [[ $GROUPTOTAL -gt 99 ]]; then echo " +100 in group. auto sim-test activated"; fi;
+
+if [[ $simtestttl -lt 1 ]] || [[ $SKIP2ANALYSIS -ne 0 ]] || [[ $GROUPTOTAL -gt 99 ]]; then
+	
+	if [[ $(echo $SIMFIX) -eq 2 ]]; then SKIP2ANALYSIS=1; zeropoint8=$(echo "1"); fi
+
+	ttlcnt=0; countrounds=0; SIMFIX=0;
+	
+	if [[ $SKIP2ANALYSIS -eq 1 ]]; then SKIP2ANALYSIS=2; echo "          --- round 1/2"; 
+	elif [[ $SKIP2ANALYSIS -eq 2 ]]; then SKIP2ANALYSIS=0; echo "          --- round 2/2"; fi;
+
+	echo -e "\n  $(date +%T) - New image(s) added to group! starting Group Simularity Analysis (GSA)\n"
+
+        sudo docker run -it --rm -v $MYFILES:$DCKR facerec face_recognition --tolerance 1 --show-distance true $DCKR/$SIM/ $DCKR/$SIM > "$DATAFILES/pre${SIM}Data"; wait
+		
+        cat "$DATAFILES/pre${SIM}Data" | grep -v ',None' | grep -Po '(?<=theAMARI/).+' > "$DATAFILES/SIMDATA"
+
+	awk -F',' '{ sum[$1]+=$3;  cnt[$1]++ } ; END { for (i in sum) print i "," sum[i]/cnt[i] }' "$DATAFILES/SIMDATA" > "$SIMSCOREFILE"
+
+	sed -i 's/ .*$/,1.0/g' "$SIMSCOREFILE"; sed -i 's/\.,/,/g' "$SIMSCOREFILE"; sed -i -r '/^.{,7}$/d' "$SIMSCOREFILE";
+	echo "test"        
+	add4avg=$(echo "$(cat $SIMSCOREFILE | grep -Po '(?<=,).+' | sed 's/$/+/g' | tr -d '\n' | sed 's/ //g' | sed 's/+$//g')" | bc)
+
+        GROUPAVG=$(echo 0$(echo "scale=6; $add4avg/$GROUPTOTAL" | bc))
+
+	echo $GROUPAVG > "$DATAFILES/${SIM}GroupScore"
+
+       	> "$DATAFILES/SIMSCORES2"
+
+        for line in $(cat "$SIMSCOREFILE" | sed 's/,/,(/g' | sed "s/$/-$GROUPAVG)^2/g"); do 
+		echo 0$(echo "scale=6; $(echo $line | awk -F',' '{ print $2 }')" | bc) | sed 's/^00/0.0/g' >> "$DATAFILES/SIMSCORES2"; done
+
+       	add4avg2=$(echo "$(cat $DATAFILES/SIMSCORES2 | sed 's/$/+/g' | tr -d '\n' | sed 's/ //g' | sed 's/+$//g')" | bc)
+	echo "test2"
+       	GROUPAVG2=$(echo 0$(echo "scale=6; $add4avg2 / $GROUPTOTAL" | bc)); sqdifmean=$(echo "sqrt($GROUPAVG2)" | bc)
+
+	HIGHLIMIT=$(printf %.6f $(echo "scale=6; (e((-1/$GROUPAVG)*l(3/4))*(0.99^$GROUPTOTAL)+0.25)*$sqdifmean+$GROUPAVG+0.005" | bc -l))
+
+	#if nothing was moved out from the sim-group during the last simtest or grouptotal > 99 then this $HIGHLIMIT will be slightly lowered. every subsequent round
+	#being lowered by the increase of $mvmlt+0.10. if anything is removed then mvmlt will be rest back to 0
+	
+	if [[ $GROUPTOTAL -gt 99 ]]; then hLIMIT=$(echo $hLIMIT+1.25 | bc); fi;
+	if [[ $GROUPTOTAL -gt 99 ]] || [[ $strictLIM -eq 1 ]]; then 
+		HIGHLIMIT=$(echo "(($HIGHLIMIT-$GROUPAVG)/($mvmlt+0.05+$hLIMIT))+$GROUPAVG" | bc); mvmlt=$(echo "$mvmlt+0.10" | bc); else mvmlt=0;fi;
+
+	#fixing $HIGHLIMIT if it goes outside of intended range
+	LIMITtest1=$(echo "$HIGHLIMIT<$GROUPAVG" | bc); if [ $LIMITtest1 -eq 1 ]; then HIGHLIMIT=$(echo "$GROUPAVG + ($GROUPAVG*0.05)" | bc); fi;
+	LIMITtest2=$(echo "$HIGHLIMIT>0.5" | bc); if [ $LIMITtest2 -eq 1 ]; then HIGHLIMIT=$(echo "0.5"); echo -e "  upper bounds updated to : $HIGHLIMIT\n"; fi;
+
+	if [ $zeropoint8 -eq 1 ]; then HIGHLIMIT=$(echo "0.52"); zeropoint8=$(echo "2"); elif [ $zeropoint8 -eq 2 ]; then HIGHLIMIT=$(echo "0.49") zeropoint8=0;fi
+        echo -e "         group average : $GROUPAVG\n    standard deviation : $sqdifmean\n  current upper bounds : $HIGHLIMIT\n"
+ 
+	strictLIM=1
+        for line in $(cat "$SIMSCOREFILE"); do
+		
+		TESTsimNUM=$(echo $line | awk -F',' '{ print $2 }'); LIMITtest=$(echo "$TESTsimNUM>$HIGHLIMIT" | bc)
+
+                if [ $LIMITtest -eq 1 ]; then
+
+                       	SENDOUTFILE=$(echo $line | awk -F',' '{ print $1 }')
+			
+			echo "  $SENDOUTFILE exceeds upper bounds : ${HIGHLIMIT} (${TESTsimNUM}). removing"
+        		             	
+			mv "$MYFILES/$SIM/${SENDOUTFILE}" "$MYFILES/$ALMOST/${SENDOUTFILE}_SIM_$HIGHLIMIT.png"; else echo "  $line"; strictLIM=0; fi; done;
+
+	GROUPTOTAL=$(ls "$MYFILES/$SIM" -Uba1 | grep -c .png)
+	ALMOSTTOTAL=$(echo $(ls $MYFILES/$ALMOST -Uba1 | grep -c .png))
+
+	printf %.6f $(echo "$GROUPAVG" | bc) > "$DATAFILES/thegroupavg"
+
+        printf %.6f $(echo "$HIGHLIMIT" | bc) > "$DATAFILES/thehighlimit"
+
+	testTotal=$(printf %.0f $(echo "0.10 * $GROUPTOTAL + 1" | bc));	
+	SDTTL=$(printf %.0f $(echo "$testTotal * $hLIMIT * 1.5" | bc)); if [ $SDTTL -lt 5 ]; then SDTTL=4; elif [ $SDTTL -gt 100 ]; then SDTTL="100"; fi;
+	X=$(printf %.0f $(echo "$SDTTL / 4" | bc));
+	simtestttl=$(echo "$SDTTL")
+
+	echo "$(date +%T), $GROUPTOTAL, $ALMOSTTOTAL, $GROUPAVG, $HIGHLIMIT, $LOOPCNT, $simtestttl, $SDTTL, ${sqdifmean}__POSTSIMTEST" >> $DATAFILES/AMARIarchive
+	
+	if [ $GROUPTOTAL -gt 99 ]; then if [ $(echo "$GROUPAVG > 0.4" | bc) -eq 0 ]; then DONE=$(echo "2"); fi; fi
+
+elif [[ $TOTAL -eq 0 ]]; then	
+
+	if [[ $countrounds -eq 1 ]]; then #changed from 2 to 1 to allow for quicker simfix reshuffling
+
+		countrounds=0; SIMFIX=$(echo "$SIMFIX+1" | bc); 
+		
+		if [ $(echo "$ALMOSTTOTAL>400" | bc) -eq 1 ]; then SIMFIX=2; fi; #faster simfixes once ALMOSTTOTAL is sufficiently full of images
+		if [ $SIMFIX -eq 2 ]; then 
+		
+			HIGHLIMIT=$(echo "0.5"); SKIP2ANALYSIS=1; 
+
+			echo -e "\n  not a lot of images are being added to the [sim-group]... Re-analyzing all [almost-sim] and [sim-group] images.\n"
+			echo -e "  this may take a very long time depending on how big your [almost-sim] & [sim-group] are!\n"	
+
+			for file in "$MYFILES/$ALMOST/"*.png; do mv "$file" "$MYFILES/$SIM"; done; wait; ALMOSTTOTAL=0;
+			GROUPTOTAL=$(echo $(ls "$MYFILES/$SIM" -Uba1 | grep -c .png))
+			echo "$(date +%T), $GROUPTOTAL, $ALMOSTTOTAL, $GROUPAVG, $HIGHLIMIT, $LOOPCNT, $simtestttl, $SDTTL, SIMFIX" >> $DATAFILES/AMARIarchive
+		else 
+		
+			HIGHLIMIT=$(echo 0$(echo "$HIGHLIMIT * 1.05" | bc)); LIMITtest=$(echo "$HIGHLIMIT>0.5" | bc); 
+		
+			if [ $LIMITtest -eq 1 ]; then HIGHLIMIT=$(echo "0.5"); fi; echo -e "\n  [upper bounds increased to $HIGHLIMIT]"; 
+
+			echo "$(date +%T), $GROUPTOTAL, $ALMOSTTOTAL, $GROUPAVG, $HIGHLIMIT, $LOOPCNT, $simtestttl, $SDTTL, HIGHERLIMIT" >> $DATAFILES/AMARIarchive
+		fi
+	else
+		countrounds=$(echo "$countrounds + 1" | bc); GROUPTOTAL=$(echo $(ls "$MYFILES/$SIM" -Uba1 | grep -c .png))
+		ALMOSTTOTAL=$(echo $(ls $MYFILES/$ALMOST -Uba1 | grep -c .png))
+		echo "$(date +%T), $GROUPTOTAL, $ALMOSTTOTAL, $GROUPAVG, $HIGHLIMIT, $LOOPCNT, $simtestttl, $SDTTL, countrounds+1:$countrounds" >> $DATAFILES/AMARIarchive
+	fi
+
+	printf %.6f $(echo "$HIGHLIMIT" | bc) > "$DATAFILES/thehighlimit"
+else
+
+	GROUPTOTAL=$(echo $(ls "$MYFILES/$SIM" -Uba1 | grep -c .png))
+	ALMOSTTOTAL=$(echo $(ls $MYFILES/$ALMOST -Uba1 | grep -c .png))
+
+	echo "$(date +%T), $GROUPTOTAL, $ALMOSTTOTAL, $GROUPAVG, $HIGHLIMIT, $LOOPCNT, $simtestttl, $SDTTL, standardloopend" >> $DATAFILES/AMARIarchive
+fi; done
+
+GROUPTOTAL=$(echo $(ls "$MYFILES/$SIM" -Uba1 | grep -c .png)); ALMOSTTOTAL=$(echo $(ls $MYFILES/$ALMOST -Uba1 | grep -c .png))
+echo "$(date +%T), $GROUPTOTAL, $ALMOSTTOTAL, $GROUPAVG, $HIGHLIMIT, $LOOPCNT, $simtestttl, $SDTTL, FINAL" >> $DATAFILES/AMARIarchive
+echo "group of $GROUPTOTAL images created!"
