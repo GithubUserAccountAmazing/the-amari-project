@@ -122,7 +122,7 @@ The specific command used:
 <br><br>
 ## Prompting Stable-Diffusion for *
 
-<br>The following commands and prompts were used to test the trained Amari models using [lstein's implementation of Stable-Diffusion](https://github.com/lstein/stable-diffusion).
+<br>The following commands and prompts were used to test the trained Amari models using [lstein's implementation of Stable-Diffusion](https://github.com/lstein/stable-diffusion) (now known as InvokeAI).
 
 &nbsp;&nbsp;
 |Commands|Prompts|
