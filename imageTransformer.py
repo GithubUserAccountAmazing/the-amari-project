@@ -69,7 +69,7 @@ def confirmed_Transform(img_input, img_output):
 
     # if not using png images: change 'png' to the image extension you are working with in the following command to rename images that aren't pngs.
     # (or modify to work with any image extension if you are so bold)
-    bashRename = 'wait; for file in "' + img_output + '/"*.jpeg; do mv -- "$file" "$(mktemp --dry-run "' + img_output + '/XXXXXXXXXXX.jpeg")"; done'
+    bashRename = 'wait; for file in "' + img_output + '/"*.png; do mv -- "$file" "$(mktemp --dry-run "' + img_output + '/XXXXXXXXXXX.png")"; done'
 
     os.system(bashRename)
 
