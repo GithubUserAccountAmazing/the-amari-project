@@ -25,6 +25,7 @@ If you have any thoughts, relevant knowledge, or ideas that you would like to pa
 5. [Prompting Stable Diffusion for *](#prompting-stable-diffusion-for-)
 6. [Analyzing the Results](#analyzing-the-results)
 7. [Final Thoughts about the Amari Project](#final-thoughts-about-the-amari-project)
+8. [What's next?](#whats-next)
 
 <br>
 
@@ -164,7 +165,7 @@ The training group and sim-score are both shown beneath each image.<br>
 
 *This is the only image out of 80 that had a sim-score <=0.40. However, the realism of this image is arguably not great. The image also does not reflect the prompt idea of 'walking outside.'
  
-<br>For the full set of 80 images see the included amari_test_images.zip<br><br>
+<br>For the full set of 80 images see (the soon to be included) amari_test_images.zip<br><br>
 
 ## Analyzing the Results
 
@@ -187,7 +188,9 @@ Outside of images where a face was not found-the individual prompts had little e
 
 <br><br><br><br>
 
-Number of images in a training group will determine the sim-scores for a generated image. A single completed a-312 epoch produced much better sim-scores versus c-4's 77 total epochs.
+Number of images in a training set seemingly effects the average sim-score of faces produced by the trained model
+ 
+It is shown that a single epoch completed by group a-312 produced more favorable results versus c-4's 77 total epochs.
  
 <br><br><br><br><br><br>
  
@@ -197,19 +200,25 @@ Number of images in a training group will determine the sim-scores for a generat
  
 - It is indeed possible to generate faces via Stable-Diffusion that are very similar to each other.
 - Textual Inversion may be used to create trained models of a specific face
-- A trained face model that uses more than the reccommended amount of 3-5 images will produce faces more similar to the original faces on average.
+- A trained face model that uses more than the reccommended amount of 3-5 images will produce faces more similar to the original face when compared to a group with less images trained for the same number of steps.
  
  <br>
 
 The default imagenet_templates were used during training and I am currently uncertain how modifying these prompts would alter the trained model.
  
-It is unknown currently how an increase in training time would influence the results for the 3 training groups. I may in the future add more time to each group and post the results.
+It is unknown currently how an increase/decrease in training time would influence the results for the 3 training groups. I may in the future add more time to each group and post the results.
 
-It's also currently unknown what the sim-scores of an actual collection of a real human face is-perhaps 0.40 is still too high. Also, it's very easy to consider that the idea of a 'sim-score' may not be the best way of determining if any single face should belong in a group of faces.
+It's also currently unknown what the sim-scores of an actual collection of a real human face is-perhaps 0.40 is still too high. This is something that would be interesting to look into. Also, it's very easy to consider that the idea of a 'sim-score' may not be the best way of determining if any single face should belong in a group of faces.
 
-It was noticed that while using ASDF to generate faces—many of the images seemed to have been upscaled incorrectly when it came to certain hairstyles. This may be the result of Real-ESRGAN and/or GFPGAN displaying training bias. More research would need to be done to determine if that is indeed factual. Simple observation showed that straight hair was upscaled more appropriately than tightly coiled hairstyles. This resulted in the trained models having a high likelyhood of generated malformed hairstyles.
+It was noticed that while using ASDF to generate faces—many of the images seemed to have been upscaled incorrectly when it came to certain hairstyles. This may be the result of Real-ESRGAN and/or GFPGAN displaying training bias. More research would need to be done to determine if that is indeed factual. Simple observation showed that straight hair was upscaled more appropriately than tightly coiled hairstyles. This resulted in the trained models seemingly having a high likelyhood of generated malformed hairstyles.
 
-Outside of the prompts listed during the testing phase, this project did not look into using other prompts to produce faces. These images were also not upscaled after being generated. It is probable that higher quality faces could be produced with modified prompts and upscaling. I also did not look into using img2img to produce faces either. It is probable that img2img could be a powerful tool as well.
+Outside of the prompts listed during the testing phase, this project did not look into using other prompts to produce faces. These images were also not upscaled after being generated. It is probable that higher quality faces could be produced with modified prompts and upscaling. It is probable that img2img could be a powerful tool as well.<br><br>
+ 
+## What's next?
+ 
+ <br>I'm currently doing tests to see how <b>very</b> large training sets will affect the generated results.
+ 
+ The results of these tests will be posted and merged into this repository when completed.
 
 
 
