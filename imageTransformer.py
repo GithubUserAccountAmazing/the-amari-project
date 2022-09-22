@@ -24,65 +24,103 @@
 #
 # ---------------------------------------------------------------------------
 
-import torch
-import torchvision.transforms as T
-from PIL import Image
-import uuid
-import os, random
-import numpy as np
-import sys
-import time
-
-
-# Defining Functions
-# ---------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------
+#------------------------------- Defining Functions -----------------------------------------
+#--------------------------------------------------------------------------------------------
 
 def confirm_prompt(question: str) -> bool:
     reply = None
-    while reply not in ("continue", "exit"):
-        reply = input(f"{question} (continue/exit): ").casefold()
-    return (reply == "continue")
-
-
-def confirmed_Transform(img_input, img_output):
-    files = os.listdir(img_input)
-    random_files = np.random.choice(files, int(len(files)))
-
-    for x in random_files:
-        thefile = (img_input + f'/{x}')
-        print(thefile)
-        img = Image.open(thefile)
-
-    #-----------------------------------------------
-
-    #if you want your images to be randomly resized and then cropped use
-        #transform = T.RandomResizedCrop((512,512))
-
-        transform = T.RandomCrop((512,512))
-
-    #-----------------------------------------------
-
-        img = transform(img)
-        img.save(userinputs[1] + f"/{x}")
-
-    time.sleep(0.5)
-
-    # if not using png images: change 'png' to the image extension you are working with in the following command to rename images that aren't pngs.
-    # (or modify to work with any image extension if you are so bold)
-    bashRename = 'wait; for file in "' + img_output + '/"*.png; do mv -- "$file" "$(mktemp --dry-run "' + img_output + '/XXXXXXXXXXX.png")"; done'
-
-    os.system(bashRename)
-
-    print("\nAll image transformations complete.\nTransformed images can be found in: " + userinputs[1] + "\n")
-
-
-def exit_script():
-
-    return "\nuser has gracefully exited imageTransformer.py!\n"
-
+    while reply not in ("y", "n"):
+        reply = input(f"{question} (y/n): ").casefold()
+    return (reply == "y")
 
 #--------------------------------------------------------------------------------------------
 
+def confirmed_Transform(img_input, img_output):
+
+    try:
+    
+        #random_files = np.random.choice(files, int(len(files)))
+
+        for file_name in os.listdir(img_input):
+
+            thefile = os.path.join(img_input,file_name)
+            thenewfile = os.path.join(img_output,file_name) 
+
+            print(thefile)
+
+            img = Image.open(thefile)
+            img_ext = img.format
+        
+            #get image width and height
+            img_width = img.size[0]
+            img_height = img.size[1]
+            
+            #the square that will be cropped is determined by the size of the image
+            #with the max size being the smaller of width and height
+            if img_width > img_height:
+                square_max = img_height
+            else:
+                square_max = img_width
+            
+
+            if square_max <= 512:
+                #set a static size for the image if height is less than 512px
+                img_sq = square_max
+            else:   
+                #otherwise generate a number between 512 and img_height
+                #to determine the size of the square size to crop
+                #this hopefully will allow for finer details to be
+                #included into the trained model
+                img_sq = random.randint(512,square_max)
+
+
+            #define a Transform command to crop a square image 
+            #in a random location with size img_sq x img_sq
+            transform = T.RandomCrop((img_sq,img_sq))
+
+            #perform transformation
+            img = transform(img)
+        
+            #define resize transformation
+            resize = T.Resize((512,512))
+
+            #perform resize transformation
+            img = resize(img)
+
+            #saves newly transformed image into the output directory
+            #defined in the user commandline argument
+            img.save(thenewfile)
+
+        #let your computer take a breather; it deserves it.
+        time.sleep(0.5)
+
+        #bash command that will move out the files to outdirectory and rename them
+        bashRename = 'wait; for file in "' + img_output + '/"*; do ext=${file##*.}; mv -- "$file" "$(mktemp --dry-run "' + img_output + '/XXXXXXXXXXX.$ext")"; done'
+        #run bash command
+
+        os.system(bashRename)
+
+        print("\nImage transformations complete.\nTransformed images can be found in: " + img_output)
+        print(exit_script())
+                    
+    except:
+        
+        #exiting script: 
+        print("Error: During transformation step.")
+        print("Please verify that your directories and/or files exist")
+        print("and/or remove non-image files")
+        print(exit_script())      
+
+#--------------------------------------------------------------------------------------------
+
+def exit_script():
+
+    return "\nuser has 'gracefully' exited imageTransformer.py!\n"
+
+#--------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------
+#--------------------------------------------------------------------------------------------
 
 inImages=sys.argv[1]
 outImages=sys.argv[2]
@@ -92,14 +130,14 @@ userinputs = [inImages, outImages];
 for userinput in range(len(userinputs)):
     if userinputs[userinput][-1] == "/":
         userinputs[userinput] = userinputs[userinput][:-1]
-        
+
 print("\n----------------------------------------")
 print("\n   Input file directory  :  " + userinputs[0])
 print("  Output file directory  :  " + userinputs[1])
 print("\n----------------------------------------\n")
 
 #allow user to reverse a potential user error
-reply = confirm_prompt("Please confirm your input and output directories and then type")
+reply = confirm_prompt("Please confirm your input and output directories. Enter 'y' to proceed ")
 
 if reply != False:
 
