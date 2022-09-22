@@ -205,11 +205,9 @@ It is shown that a single epoch completed by group a-312 produced more favorable
  
  <br>
 
-The default imagenet_templates were used during training and I am currently uncertain how modifying these prompts would alter the trained model.
- 
-It is unknown currently how an increase/decrease in training time would influence the results for the 3 training groups. I may in the future add more time to each group and post the results.
+The default imagenet_templates were used during training and at the time of this project I was unsure how modifying them would alter training. However, according to https://github.com/rinongal/textual_inversion/issues/59#issuecomment-1239210198 they do have an influence on the training process. It may be interesting to see how certain prompts would affect the output images.
 
-It's also currently unknown what the sim-scores of an actual collection of a real human face is-perhaps 0.40 is still too high. This is something that would be interesting to look into. Also, it's very easy to consider that the idea of a 'sim-score' may not be the best way of determining if any single face should belong in a group of faces.
+It's currently unknown to me what the sim-scores of an actual collection of a real human face is-perhaps 0.40 is still too high. It's very easy to consider that the idea of a 'sim-score' may not be the best way of determining if any single face should belong in a group of faces.
 
 It was noticed that while using ASDF to generate faces—many of the images seemed to have been upscaled incorrectly when it came to certain hairstyles. This may be the result of Real-ESRGAN and/or GFPGAN displaying training bias. More research would need to be done to determine if that is indeed factual. Simple observation showed that straight hair was upscaled more appropriately than tightly coiled hairstyles. This resulted in the trained models seemingly having a high likelyhood of generated malformed hairstyles.
 
