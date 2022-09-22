@@ -189,7 +189,7 @@ Outside of images where a face was not found-the individual prompts had little e
 
 <br><br><br><br>
 
-Number of images in a training set seemingly effects the average sim-score of faces produced by the trained model
+Number of images in a training set seemingly affects the average sim-score of faces produced by the trained model
  
 It is shown that a single epoch completed by group a-312 produced more favorable results versus c-4's 77 total epochs.
  
