@@ -199,7 +199,7 @@ It is shown that a single epoch completed by group a-312 produced more favorable
  
  <br>
  
-- It is indeed possible to generate faces via Stable-Diffusion that are very similar to each other.
+- It is indeed possible to generate faces via Stable-Diffusion that are very similar to each other given enough time.
 - Textual Inversion may be used to create trained models of a specific face
 - A trained face model that uses more than the reccommended amount of 3-5 images will produce faces more similar to the original face when compared to a group with less images trained for the same number of steps.
  
