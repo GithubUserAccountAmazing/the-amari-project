@@ -87,10 +87,8 @@ def confirmed_Transform(img_input, img_output):
             #define a Transform command to crop a square image 
             #in a random location with size img_sq x img_sq
             transform = T.RandomCrop((img_sq,img_sq))
-            print("DSFSDF")
             #perform transformation
             img = transform(img)
-            print("WERWFWDF") 
             #define resize transformation
             resize = T.Resize((512,512))
 
