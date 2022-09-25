@@ -93,7 +93,6 @@ def confirmed_Transform(img_input, img_output):
 
             #perform resize transformation
             img = resize(img)
-            print("?")
             #saves newly transformed image into the output directory
             #defined in the user commandline argument
             img.save(thenewfile)
