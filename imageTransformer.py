@@ -83,7 +83,6 @@ def confirmed_Transform(img_input, img_output):
                 #included into the trained model
                 img_sq = random.randint(512,square_max)
 
-            print("?")
             #define a Transform command to crop a square image 
             #in a random location with size img_sq x img_sq
             transform = T.RandomCrop((img_sq,img_sq))
