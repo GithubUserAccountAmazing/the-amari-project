@@ -19,11 +19,9 @@
 #  python imagecrop.py '/path/to/input/images/' '/path/to/output/images/'
 #
 # ---------------------------------------------------------------------------
-#
-#  this script runs a bash command to rename the files to random characters.
-#
-# ---------------------------------------------------------------------------
 
+
+# import required libraries
 import torch
 import torchvision.transforms as T
 from PIL import Image
@@ -32,6 +30,7 @@ import os, random
 import numpy as np
 import sys
 import time
+import string
 
 #--------------------------------------------------------------------------------------------
 #------------------------------- Defining Functions -----------------------------------------
@@ -65,6 +64,7 @@ def confirmed_Transform(img_input, img_output):
             img_width = img.size[0]
             img_height = img.size[1]
             
+            
             #the square that will be cropped is determined by the size of the image
             #with the max size being the smaller of width and height
             if img_width > img_height:
@@ -83,32 +83,41 @@ def confirmed_Transform(img_input, img_output):
                 #included into the trained model
                 img_sq = random.randint(512,square_max)
 
-
+            print("?")
             #define a Transform command to crop a square image 
             #in a random location with size img_sq x img_sq
             transform = T.RandomCrop((img_sq,img_sq))
-
+            print("DSFSDF")
             #perform transformation
             img = transform(img)
-        
+            print("WERWFWDF") 
             #define resize transformation
             resize = T.Resize((512,512))
 
             #perform resize transformation
             img = resize(img)
-
+            print("?")
             #saves newly transformed image into the output directory
             #defined in the user commandline argument
             img.save(thenewfile)
 
         #let your computer take a breather; it deserves it.
         time.sleep(0.5)
+        
+        os.chdir(img_output)
+	
+        for count, f in enumerate(os.listdir()):
+            randName = ''.join(random.choices(string.ascii_uppercase + string.ascii_lowercase, k=9))
+            f_name, f_ext = os.path.splitext(f)
+            f_name = randName
+            new_name = f'{f_name}{f_ext}'
+            os.rename(f, new_name)
 
-        #bash command that will move out the files to outdirectory and rename them
-        bashRename = 'wait; for file in "' + img_output + '/"*; do ext=${file##*.}; mv -- "$file" "$(mktemp --dry-run "' + img_output + '/XXXXXXXXXXX.$ext")"; done'
+
+        #previous command where python is used to call a bash command to rename files
+        #bashRename = 'wait; for file in "' + img_output + '/"*; do ext=${file##*.}; mv -- "$file" "$(mktemp --dry-run "' + img_output + '/XXXXXXXXXXX.$ext")"; done'
         #run bash command
-
-        os.system(bashRename)
+        #os.system(bashRename)
 
         print("\nImage transformations complete.\nTransformed images can be found in: " + img_output)
         print(exit_script())
@@ -155,3 +164,4 @@ if reply != False:
 else:
 
     print(exit_script())
+
