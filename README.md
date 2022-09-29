@@ -1,9 +1,3 @@
-note: this repository will most likely be renamed to Stable-Diffusion-Tests-and-Data (or something similar) with The Amari Project becoming a sub directory of the newly named repository. There are several more Stable-Diffusion related tests that I think would be interesting to perform and learn from. Once new tests and data are created they will be merged into this repository.
-
-If you have any thoughts, relevant knowledge, or ideas that you would like to pass on to me, feel free to email me at originates@tutanota.com
-
-
----
 
 <br><br><p align="center"><img src="https://github.com/originates/the-amari-project/blob/main/github%20images/amarifaces.gif?raw=true" alt="The Amari Project"></p>
 
@@ -25,7 +19,6 @@ If you have any thoughts, relevant knowledge, or ideas that you would like to pa
 5. [Prompting Stable Diffusion for *](#prompting-stable-diffusion-for-)
 6. [Analyzing the Results](#analyzing-the-results)
 7. [Final Thoughts about the Amari Project](#final-thoughts-about-the-amari-project)
-8. [What's next?](#whats-next)
 
 <br>
 
@@ -213,11 +206,4 @@ It was noticed that while using ASDF to generate faces—many of the images seem
 
 Outside of the prompts listed during the testing phase, this project did not look into using other prompts to produce faces. These images were also not upscaled after being generated. It is probable that higher quality faces could be produced with modified prompts and upscaling. It is probable that img2img could be a powerful tool as well.<br><br>
  
-## What's next?
- 
- <br>I'm currently doing tests to see how <b>very</b> large training sets will affect the generated results.
- 
- The results of these tests will be posted and merged into this repository when completed.
-
-
 
