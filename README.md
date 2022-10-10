@@ -10,43 +10,15 @@
 
 <br>
 
-## **Table of Contents**
-
-1. [Introduction (where I try to subtly convince the reader that generating thousands of faces isn't weird)](#introduction)
-2. [Using Stable-Diffusion to Mine for a Specific Face](#using-stable-diffusion-to-mine-for-a-specific-face)
-3. [Putting an AI generated Face to a Name](#putting-an-ai-generated-face-to-a-name)
-4. [Textual Inversion Testing and Training](#textual-inversion-testing-and-training)
-5. [Prompting Stable Diffusion for *](#prompting-stable-diffusion-for-)
-6. [Analyzing the Results](#analyzing-the-results)
-7. [Final Thoughts about the Amari Project](#final-thoughts-about-the-amari-project)
-
-<br>
-
 ## Introduction
 
-<br>After learning about [Textual Inversion](https://github.com/rinongal/textual_inversion) 2 of my first thoughts were:
+<br>After learning about [Textual Inversion](https://github.com/rinongal/textual_inversion) 3 of my first thoughts were:
 
 - could this be used to teach [Stable-Diffusion](https://github.com/CompVis/stable-diffusion) (SD) a specific person/face?
 - and if I wanted to test this idea, how could I go about it? 
+- lastly, what if I used SD itself to generate faces? 
 
-
-I thought about using my face as training data but ultimately decided against it for 2 reasons.
-
-- I wasn't quite ready to have SD learn what I looked like.
-- if I wanted to share this publicly, I didn't particularly want to share a trained model of my face online.
-
-
-I considered using someone else’s face but again, decided against this idea as well.
-
-- I did not want to use someone's face without permission
-- I generally wanted to avoid explaining to someone why I wanted to use their face for a machine learning project.
-
-If the potential to use my face or someone else’s face was out of the question, how could I possibly have a face to use as training data for SD? 
-
-What if I used SD itself to generate faces? 
-
-(it wasn't until half way through the project that it was realized that royalty-free stock images could have accomplished this instead)<br><br>
-
+<br><br>
 
 ## Using Stable-Diffusion to Mine for a Specific Face
 
@@ -73,7 +45,7 @@ The Face Recognition program works by comparing 2 images and outputting a number
 
 <br>After mining for faces for many hours—312 images with a <=0.40 sim-score to each other had been created. There was also approximately 3900 images that were 'almost' considered the same person
 
-While not particularly important-I felt the face being generated needed a name. The name Amari was chosen since it had several meanings such as eternal and immortal. Thus, the name of the project, the bash script, and the face had been born.
+While not particularly important-I felt the face being generated needed a name. The name Amari was chosen since it had several meanings such as eternal and immortal which I thought was neat. Thus, the name of the project, the bash script, and the face had been born.
 
 Finally, [`imageTransformer.py`](imageTransformer.py) was written to copy, rescale, and rename the images produced during the face mining step.<br><br>
 
@@ -194,7 +166,7 @@ It is shown that a single epoch completed by group a-312 produced more favorable
  
 - It is indeed possible to generate faces via Stable-Diffusion that are very similar to each other given enough time.
 - Textual Inversion may be used to create trained models of a specific face
-- A trained face model that uses more than the reccommended amount of 3-5 images will produce faces more similar to the original face when compared to a group with less images trained for the same number of steps.
+- A trained face model that uses more than the reccommended amount of 3-5 images will produce faces more similar to the original face when compared to a group with less images trained for the same number of steps at the defaulted textual inversion training settings.
  
  <br>
 
