@@ -8,18 +8,6 @@
 
 ----
 
-<br>
-
-## Introduction
-
-<br>After learning about [Textual Inversion](https://github.com/rinongal/textual_inversion) 3 of my first thoughts were:
-
-- could this be used to teach [Stable-Diffusion](https://github.com/CompVis/stable-diffusion) (SD) a specific person/face?
-- and if I wanted to test this idea, how could I go about it? 
-- lastly, what if I used SD itself to generate faces? 
-
-<br><br>
-
 ## Using Stable-Diffusion to Mine for a Specific Face
 
 <p align="center"><img src="https://github.com/originates/the-amari-project/blob/main/github%20images/kramerfaces.gif?raw=true" alt="It does kind of seem like something Kramer might do.">
