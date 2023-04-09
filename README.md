@@ -5,12 +5,12 @@ The Amari Project is a novel research project that explores the possibilities an
 <p align="center"><img src="https://github.com/originates/the-amari-project/blob/main/github%20images/kramerfaces.gif?raw=true" alt="It does kind of seem like something Kramer might do.">
 <br><br>
 
-The Amari Project consists of two main components: ASDF (Amari Stable Diffusion FaceMiner) and imageTransformer. ASDF is a bash script that automates the process of generating and filtering face images from a text prompt using Stable-Diffusion. imageTransformer is a Python script that copies, rescales, and renames the images produced by ASDF for further processing.
+The Amari Project consists of two main components: [`ASDF (AMARI SD FaceMiner)`](AMARI%20SD%20FaceMiner) and [`imageTransformer.py`](imageTransformer.py). ASDF is a bash script that automates the process of generating and filtering face images from a text prompt using Stable-Diffusion. imageTransformer is a Python script that copies, rescales, and renames the images produced by ASDF for further processing.
 
 ASDF works as follows:
 
 - It takes a text prompt as input and uses Stable-Diffusion to generate face images based on the prompt. The model used for this step is sd-v1-4.ckpt, which is trained on a large dataset of face images.
-- It uses [Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN) and GFPGAN](https://github.com/TencentARC/GFPGAN) to upscale the images and enhance the facial features. These are two state-of-the-art models for super-resolution and face restoration, respectively.
+- It uses [Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN) and [GFPGAN](https://github.com/TencentARC/GFPGAN) to upscale the images and enhance the facial features. These are two state-of-the-art models for super-resolution and face restoration, respectively.
 - It uses [Face Recognition](https://github.com/ageitgey/face_recognition) to compare the upscaled images to a set of images called sim-group, which contains the most similar images to the target face.
 - Face Recognition is also used to determine the average similarity of all the images within the sim-group and remove images if they become less similar to the group as new images are included.
 
@@ -20,8 +20,7 @@ The Face Recognition program works by comparing 2 images and outputting a number
 ## Putting an AI Generated Face to a Name.
 
 <br>After mining for faces for many hours—312 images with a <=0.40 sim-score to each other had been created. There was also approximately 3900 images that were 'almost' considered the same person
-
-Finally, [`imageTransformer.py`](imageTransformer.py) was written to copy, rescale, and rename the images produced during the face mining step.<br><br>
+<br>
 
 ## Textual Inversion Testing and Training
 
