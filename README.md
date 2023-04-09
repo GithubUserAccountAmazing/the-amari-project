@@ -154,6 +154,6 @@ I also identified some limitations and future directions for this project. For i
 
 ## The Future
 
-I argue that this technology has significant implications for the future of fake news and culture. It can be used to create realistic and persuasive fake identities that can be used for various purposes, such as propaganda, misinformation, and social engineering. Therefore, we need to be vigilant of these threats and develop appropriate safeguards and regulations to prevent misuse and abuse of this technology.
+I contend that this technology has profound implications for the future of fake news and culture. It can already be leveraged to create realistic and persuasive fake images that can be utilized for various purposes, such as propaganda, misinformation, and social engineering. The automation of modeling a synthetic identity will make it effortless for malicious actors to generate an individual in infinite settings which will make these identities even more believable. Therefore, we need to be aware of these risks and develop suitable safeguards to prevent misuse and abuse of this technology.
  
 
