@@ -1,32 +1,20 @@
-
-<br><br><p align="center"><img src="https://github.com/originates/the-amari-project/blob/main/github%20images/amarifaces.gif?raw=true" alt="The Amari Project"></p>
-
 ### <h3 align="center">The Amari Project</h3>
 
-#### <p align="center">creating and then recognizing an artificial human face using machine learning</p>
-<br> <br>
-
-----
-
-## Using Stable-Diffusion to Mine for a Specific Face
+The Amari Project is a novel research project that explores the possibilities and challenges of Stable-Diffusion and Textual Inversion as techniques for creating and simulating artificial identities through automation. It also examines the implications of this technology for the future of fake news and culture.
 
 <p align="center"><img src="https://github.com/originates/the-amari-project/blob/main/github%20images/kramerfaces.gif?raw=true" alt="It does kind of seem like something Kramer might do.">
 <br><br>
 
-Generating faces in SD can be incredibly hit or miss in terms of the quality of the image produced. 
+The Amari Project consists of two main components: ASDF (Amari Stable Diffusion FaceMiner) and imageTransformer. ASDF is a bash script that automates the process of generating and filtering face images from a text prompt using Stable-Diffusion. imageTransformer is a Python script that copies, rescales, and renames the images produced by ASDF for further processing.
 
-To mitigate image quality issues-a bash script later titled the [`AMARI SD FaceMiner (ASDF)`](https://github.com/originates/the-amari-project/blob/main/AMARI%20SD%20FaceMiner) was created. 
+ASDF works as follows:
 
-ASDF is composed of 5 general steps
+- It takes a text prompt as input and uses Stable-Diffusion to generate face images based on the prompt. The model used for this step is sd-v1-4.ckpt, which is trained on a large dataset of face images.
+- It uses [Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN) and GFPGAN](https://github.com/TencentARC/GFPGAN) to upscale the images and enhance the facial features. These are two state-of-the-art models for super-resolution and face restoration, respectively.
+- It uses [Face Recognition](https://github.com/ageitgey/face_recognition) to compare the upscaled images to a set of images called sim-group, which contains the most similar images to the target face.
+- Face Recognition is also used to determine the average similarity of all the images within the sim-group and remove images if they become less similar to the group as new images are included.
 
-1. Generate face images from a prompt using SD using the model `sd-v1-4.ckpt`
-2. AI upscale the images and facial features using [Real-ESRGAN](https://github.com/xinntao/Real-ESRGAN) and [GFPGAN](https://github.com/TencentARC/GFPGAN).
-3. Compare the upscaled images to a set of images, labeled 'sim-group' using [Face Recognition](https://github.com/ageitgey/face_recognition)
-4. Sort the images based on how similar they are to the sim-group. If the image is considered very similar the image will itself be included into the sim-group.
-5. Use Face Recognition to determine the average similarity of all the images within the sim-group and remove images if they become less similar to the group as new images are included.
-
-The Face Recognition program works by comparing 2 images and outputting a number between 0 to 1 with 0 being perfectly similar and 1 being not at all similar. The default tolerance level for deciding if 2 faces are the same is <=0.60. Judging from visual inspection, 0.60 was not strict enough and 0.40 seemed to be a more reasonable acceptable tolerance level. This number would be referred to as the image's Sim-Score, short for similarity score.<br><br> 
-
+The Face Recognition program works by comparing 2 images and outputting a number between 0 to 1 with 0 being perfectly similar and 1 being not at all similar. The default tolerance level for deciding if 2 faces are the same is <=0.60. Based on visual inspection, 0.60 was not strict enough and 0.40 seemed to be a more reasonable acceptable tolerance level. This number would be referred to as the image's Sim-Score, short for similarity score.
 
 
 ## Putting an AI Generated Face to a Name.
@@ -146,22 +134,26 @@ It is shown that a single epoch completed by group a-312 produced more favorable
  
 <br><br><br><br><br><br>
  
- ## Final Thoughts about the Amari Project
+## Final Thoughts about the Amari Project
+
+In this project, I demonstrated the feasibility and the limitations of Stable-Diffusion and Textual Inversion as techniques for generating and simulating synthetic identities through automation and we found that:
+
+- Stable-Diffusion can produce faces that are very similar to each other given enough time and iterations.
+- Textual Inversion can be used to create trained models of a specific face by using a few reference images.
+- A trained face model that uses more than the recommended number of 3-5 images will produce faces that are more faithful to the original face than a model that uses fewer images, under the same training settings and steps.
  
- <br>
- 
-- It is indeed possible to generate faces via Stable-Diffusion that are very similar to each other given enough time.
-- Textual Inversion may be used to create trained models of a specific face
-- A trained face model that uses more than the reccommended amount of 3-5 images will produce faces more similar to the original face when compared to a group with less images trained for the same number of steps at the defaulted textual inversion training settings.
- 
- <br>
 
-The default imagenet_templates were used during training and at the time of this project I was unsure how modifying them would alter training. However, according to https://github.com/rinongal/textual_inversion/issues/59#issuecomment-1239210198 they do have an influence on the training process. It may be interesting to see how certain prompts would affect the output images.
+I also identified some limitations and future directions for this project. For instance:
 
-It's currently unknown to me what the sim-scores of an actual collection of a real human face is-perhaps 0.40 is still too high. It's very easy to consider that the idea of a 'sim-score' may not be the best way of determining if any single face should belong in a group of faces.
 
-It was noticed that while using ASDF to generate faces—many of the images seemed to have been upscaled incorrectly when it came to certain hairstyles. This may be the result of Real-ESRGAN and/or GFPGAN displaying training bias. More research would need to be done to determine if that is indeed factual. Simple observation showed that straight hair was upscaled more appropriately than tightly coiled hairstyles. This resulted in the trained models seemingly having a high likelyhood of generated malformed hairstyles.
+- I used the default imagenet_templates for Textual Inversion, but according to https://github.com/rinongal/textual_inversion/issues/59#issuecomment-1239210198, they can have an impact on the training process. It would be interesting to experiment with different prompts and see how they affect the output images.
+- I did not have a reliable way of measuring the similarity between the generated faces and the reference face. We used a sim-score metric, but it may not capture all the nuances and variations of human faces. A more robust and comprehensive evaluation method is needed.
+- I noticed that some hairstyles were not upscaled properly by ASDF, which uses Real-ESRGAN and GFPGAN. This may indicate a training bias or a limitation of these models.
+- I only tested a few prompts for generating faces using Stable-Diffusion. There may be other prompts that can produce better or more interesting results.
+<br><br>
 
-Outside of the prompts listed during the testing phase, this project did not look into using other prompts to produce faces. These images were also not upscaled after being generated. It is probable that higher quality faces could be produced with modified prompts and upscaling. It is probable that img2img could be a powerful tool as well.<br><br>
+## The Future
+
+I argue that this technology has significant implications for the future of fake news and culture. It can be used to create realistic and persuasive fake identities that can be used for various purposes, such as propaganda, misinformation, and social engineering. Therefore, we need to be vigilant of these threats and develop appropriate safeguards and regulations to prevent misuse and abuse of this technology.
  
 
